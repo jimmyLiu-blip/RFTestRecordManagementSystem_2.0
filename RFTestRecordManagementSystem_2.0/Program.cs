@@ -1,8 +1,10 @@
 ﻿using RFTestRecordManagementSystem.Infrastructure;
+using RFTestRecordManagementSystem.Utilities;
 using RFTestRecordManagementSystem_Repository;
 using RFTestRecordManagementSystem_Service;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
@@ -12,7 +14,7 @@ using System.Threading.Tasks;
 namespace RFTestRecordManagementSystem
 {
 
-    public class RFtTestInput
+    public class RFTestInput
     {
         public string Regulation { get; set; }         
         public string RadioTechnology { get; set; }    
@@ -86,16 +88,16 @@ namespace RFTestRecordManagementSystem
                             DeleteRecord();
                             break;
                         case "4":
-                            //GetRecordById();
+                            GetRecordById();
                             break;
                         case "5":
-                            //GetAllRecords();
+                            GetAllRecords();
                             break;
                         case "6":
-                            //SearchRecords();
+                            SearchRecords();
                             break;
                         case "7":
-                            //ExportToJson();
+                            ExportToJson();
                             break;
                         case "8":
                             //InportFromJson;
@@ -152,11 +154,70 @@ namespace RFTestRecordManagementSystem
             Console.Write("請輸入選項(1-9):");
         }
 
+        private static RFTestInput GetRequireInput()
+        {
+            var input = new RFTestInput();
+
+            Console.Write("請輸入法規(FCC、NCC、IC、TELEC、CE)：");
+            input.Regulation = Console.ReadLine();
+            while (string.IsNullOrWhiteSpace(input.Regulation))
+            {
+                Console.Write("法規(必填)，請重新輸入：");
+
+                input.Regulation = Console.ReadLine();
+            }
+
+            Console.Write("請輸入無線技術(GSM、WCDMA、LTE、NR)：");
+            input.RadioTechnology = Console.ReadLine();
+            while (string.IsNullOrWhiteSpace(input.RadioTechnology))
+            {
+                Console.Write("無線技術(必填)，請重新輸入：");
+
+                input.RadioTechnology = Console.ReadLine();
+            }
+
+            Console.Write("請輸入測試頻段(Band1、Band2...Band106)：");
+            input.Band = Console.ReadLine();
+            while (string.IsNullOrWhiteSpace(input.Band))
+            {
+                Console.WriteLine("測試頻段(必填)，請重新輸入：");
+                input.Band = Console.ReadLine();
+            }
+
+            Console.Write("請輸入量測功率(dbm)：");
+            decimal powerDbm;
+            while (!decimal.TryParse(Console.ReadLine(), out powerDbm) || powerDbm < -50 || powerDbm > 50)
+            {
+                Console.Write("量測功率超出測試範圍(-50dbm~50dbm)，請重新輸入：");
+            }
+            input.PowerDbm = powerDbm;
+
+            Console.Write("請輸入測試結果(Pass/Fail)：");
+            input.Result = Console.ReadLine();
+            while (input.Result.ToUpper() != "PASS" && input.Result.ToUpper() != "FAIL")
+            {
+                Console.WriteLine("測試結果輸入錯誤，請重新輸入(Pass / Fail)：");
+                input.Result = Console.ReadLine();
+            }
+
+            Console.Write("請輸入測試日期(yyyy-MM-dd)：");
+            DateTime testTime;
+            while (!DateTime.TryParse(Console.ReadLine(), out testTime) || testTime > DateTime.Now)
+            {
+                Console.WriteLine("日期格式錯誤或時間超出範圍，請重新輸入(yyyy-MM-dd)");
+            }
+            input.TestTime = testTime;
+
+            return input;
+        }
+
         private static void AddRecord()
         {
+            Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("   ===新增測試紀錄===   ");
+            Console.ResetColor();
 
-            RFtTestInput input = GetRequireInput();
+            RFTestInput input = GetRequireInput();
 
             try
             {
@@ -176,7 +237,9 @@ namespace RFTestRecordManagementSystem
 
         private static void UpdateRecord()
         {
+            Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("   ===更新測試紀錄===   ");
+            Console.ResetColor();
 
             Console.Write("請輸入需要更新的測試編號：");
 
@@ -199,7 +262,7 @@ namespace RFTestRecordManagementSystem
                     return;
                 }
 
-                RFtTestInput input = GetRequireInput();
+                RFTestInput input = GetRequireInput();
 
                 Console.WriteLine($"\n要更新的紀錄編號：{recordId}，測試資料：");
                 Console.WriteLine($"法規：{record.Regulation}");
@@ -239,69 +302,13 @@ namespace RFTestRecordManagementSystem
                 Console.WriteLine($"更新失敗，{ex.Message}");
                 Console.ResetColor();
             }
-            
-        }
-
-        private static RFtTestInput GetRequireInput()
-        {
-            var input = new RFtTestInput();
-
-            Console.Write("請輸入法規(FCC、NCC、IC、TELEC、CE)：");
-            input.Regulation = Console.ReadLine();
-            while (string.IsNullOrWhiteSpace(input.Regulation))
-            {
-                Console.Write("法規(必填)，請重新輸入：");
-
-                input.Regulation = Console.ReadLine();
-            }
-
-            Console.Write("請輸入無線技術(GSM、WCDMA、LTE、NR)：");
-            input.RadioTechnology = Console.ReadLine();
-            while (string.IsNullOrWhiteSpace(input.RadioTechnology))
-            {
-                Console.Write("無線技術(必填)，請重新輸入：");
-
-                input.RadioTechnology = Console.ReadLine();
-            }
-
-            Console.Write("請輸入測試頻段(Band1、Band2...Band106)：");
-            input.Band = Console.ReadLine();
-            while (string.IsNullOrWhiteSpace(input.Band))
-            {
-                Console.WriteLine("測試頻段(必填)，請重新輸入：");
-                input.Band = Console.ReadLine();
-            }
-
-            Console.Write("請輸入量測功率(dbm)：");
-            decimal powerDbm;
-            while (!decimal.TryParse(Console.ReadLine(), out powerDbm) || powerDbm < -50 || powerDbm > 50)
-            {
-                Console.Write("量測功率超出測試範圍(-50dbm~50dbm)，請重新輸入：");
-            }
-            input.PowerDbm = powerDbm;
-
-            Console.Write("請輸入測試結果(Pass/Fail)");
-            input.Result = Console.ReadLine();
-            while (input.Result.ToUpper() != "PASS" && input.Result.ToUpper() != "FAIL")
-            {
-                Console.WriteLine("測試結果輸入錯誤，請重新輸入(Pass / Fail)：");
-                input.Result = Console.ReadLine();
-            }
-
-            Console.Write("請輸入測試日期(yyyy-MM-dd)：");
-            DateTime testTime;
-            while (!DateTime.TryParse(Console.ReadLine(), out testTime) || testTime > DateTime.Now)
-            {
-                Console.WriteLine("日期格式錯誤或時間超出範圍，請重新輸入(yyyy-MM-dd)");
-            }
-            input.TestTime = testTime;
-
-            return input;
         }
 
         private static void DeleteRecord()
         {
+            Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("   ===刪除測試紀錄===   ");
+            Console.ResetColor();
 
             Console.Write("請輸入想要刪除的測試編號：");
 
@@ -365,6 +372,195 @@ namespace RFTestRecordManagementSystem
 
             Console.WriteLine("\n按任意鍵返回主選單...");
             Console.ReadKey();
+        }
+
+        private static void GetRecordById()
+        {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("   ===使用測試編號，查詢一筆測試紀錄===   ");
+            Console.ResetColor();
+
+            Console.Write("請輸入想要查詢測試紀錄的測試編號：");
+
+            int recordId;
+
+            while (!int.TryParse(Console.ReadLine(), out recordId) || recordId <= 0)
+            {
+                Console.Write("測試編號輸入的格式錯誤or編號 <= 0，請重新輸入：");
+            }
+
+            var record = _service.GetRecordById(recordId);
+
+            if (record == null)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"RecordId：{recordId}的測試紀錄不存在");
+                Console.ResetColor();
+                return;
+            }
+            else
+            {
+                int count = 1;
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"[count] 測試紀錄：\n" +
+                                  $"Regulation = {record.Regulation}, " +
+                                  $"RadioTechnology = {record.RadioTechnology}, " +
+                                  $"Band = {record.Band}, " +
+                                  $"PowerDbm = {record.PowerDbm}, " +
+                                  $"Result = {record.Result}, " +
+                                  $"TestDate = {record.TestDate}");
+                count++;
+                Console.ResetColor();
+            }
+        }
+
+        private static void GetAllRecords()
+        {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("   ===查詢所有測試紀錄===   ");
+            Console.ReadKey();
+
+            var records = _service.GetAllRecords();
+
+            if (records == null || !records.Any() )
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("目前沒有測試紀錄存在");
+                Console.ResetColor();
+                return;
+            }
+            else
+            {
+                int count = 1;
+                foreach (var record in records)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"[{count}] 找到紀錄：");
+                    Console.WriteLine($"  RecordId          = {record.RecordId}");
+                    Console.WriteLine($"  Regulation        = {record.Regulation}");
+                    Console.WriteLine($"  RadioTechnology   = {record.RadioTechnology}");
+                    Console.WriteLine($"  Band              = {record.Band}");
+                    Console.WriteLine($"  PowerDbm          = {record.PowerDbm}");
+                    Console.WriteLine($"  Result            = {record.Result}");
+                    Console.WriteLine($"  TestDate          = {record.TestDate}");
+                    Console.WriteLine(new string('-', 50));
+                    count++;
+                    Console.ResetColor();
+                }
+            }
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine($"總共有{records.Count}筆測試紀錄");
+            Console.ResetColor();
+        }
+
+        private static void SearchRecords()
+        {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("   ===使用法規、無線技術，查詢測試紀錄===   ");
+            Console.ResetColor();
+
+            Console.Write("請輸入欲搜尋的法規(至少填一種regulation、radioTechnology)：");
+            string regulation = Console.ReadLine();
+
+            Console.Write("請輸入欲搜尋的無線技術(至少填一種regulation、radioTechnology)：");
+            string radioTechnology = Console.ReadLine();
+
+            while (string.IsNullOrWhiteSpace(regulation) && string.IsNullOrWhiteSpace(radioTechnology))
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write("不可以 regulation、radioTechnology 同時都沒輸入，請重新輸入：");
+                Console.ResetColor();
+
+                Console.Write("請輸入法規：");
+                regulation = Console.ReadLine();
+
+                Console.Write("請輸入無線技術：");
+                radioTechnology = Console.ReadLine();
+            }
+
+            var records = _service.SearchRecords(regulation, radioTechnology);
+
+            if (records == null || !records.Any())
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"目前沒有Regulation：{regulation}、RadioTechnology：{radioTechnology}測試紀錄存在");
+                Console.ResetColor();
+            }
+            else
+            {
+                int count = 1;
+                foreach (var record in records)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"[{count}] 找到紀錄：");
+                    Console.WriteLine($"  RecordId          = {record.RecordId}");
+                    Console.WriteLine($"  Regulation        = {record.Regulation}");
+                    Console.WriteLine($"  RadioTechnology   = {record.RadioTechnology}");
+                    Console.WriteLine($"  Band              = {record.Band}");
+                    Console.WriteLine($"  PowerDbm          = {record.PowerDbm}");
+                    Console.WriteLine($"  Result            = {record.Result}");
+                    Console.WriteLine($"  TestDate          = {record.TestDate}");
+                    Console.WriteLine(new string('-',50));
+                    count++;
+                    Console.ResetColor();
+                }
+            }
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine($"總共有{records.Count}筆測試紀錄");
+            Console.ResetColor();
+        }
+
+        private static void ExportToJson()
+        {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("   === 將資料匯出成 JSON 檔案 ===   ");
+            Console.ResetColor();
+
+            try
+            {
+                var records = _service.GetAllRecords();
+
+                if (records == null || !records.Any())
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("目前沒有測試紀錄存在");
+                    Console.ResetColor();
+                    return;
+                }
+
+                string fileName = $"RFTestRecords_{DateTime.Now:yyyyMMdd_HHmmss}.json";
+
+                // 將檔案存到專案目錄下的「Export」資料夾
+                string defaultPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Export", fileName);
+
+                // 確保 Export 資料夾存在（否則會報錯）
+                Directory.CreateDirectory(Path.GetDirectoryName(defaultPath));
+
+                Console.Write($"預設儲存路徑為：{defaultPath}，是否要修改儲存位置?(Y/N)：");
+                string answer = Console.ReadLine().Trim().ToUpper();
+
+                string filePath = defaultPath;
+                if (answer == "Y")
+                {
+                    Console.Write("請輸入要儲存的完整路徑(含檔名.json)：");
+                    filePath = Console.ReadLine().Trim();
+                }
+
+                JsonFileHelper.ExportToJson(records, filePath);
+
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"匯出成功，檔案已經儲存在{filePath}");
+                Console.ResetColor();
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"匯出失敗，{ex.Message}");
+                Console.ResetColor();
+            }
         }
     }
 }

@@ -54,6 +54,10 @@
       <Project>{8BEA9104-8003-4D54-AAF8-66DB32B734A6}</Project>
       <Name>RFTestRecordManagementSystem.Infrastructure</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RFTestRecordManagementSystem.Utilities\RFTestRecordManagementSystem.Utilities.csproj">
+      <Project>{4436F727-0825-419A-9730-CE43EAD861C8}</Project>
+      <Name>RFTestRecordManagementSystem.Utilities</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RFTestRecordManagementSystem_Domain\RFTestRecordManagementSystem_Domain.csproj">
       <Project>{7C0D1E19-C98B-4A1A-84C5-16B88AE4B948}</Project>
       <Name>RFTestRecordManagementSystem_Domain</Name>
