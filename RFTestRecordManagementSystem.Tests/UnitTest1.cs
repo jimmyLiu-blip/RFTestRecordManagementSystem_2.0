@@ -12,14 +12,16 @@ namespace RFTestRecordManagementSystem.Tests
         [InlineData(null)]
         [InlineData("")]
         [InlineData("   ")]
-        public void AddRecord_ShouldThrowArgumentNullException_WhenRegulationIsNull(string regulation)
+        public void AddRecord_ShouldThrowArgumentException_WhenRegulationIsNull(string regulation)
         {
             var mockRepo = new Mock<IRFTestRecordRepository>();
 
             var service = new RFTestRecordService(mockRepo.Object);
 
-            Assert.Throws<ArgumentNullException>(() => 
+            Assert.Throws<ArgumentException>(() => 
                 service.AddRecord(regulation, "NR", "B1", 23, "Pass", DateTime.Now));
         }
+
+
     }
 }
