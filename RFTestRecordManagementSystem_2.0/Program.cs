@@ -26,21 +26,33 @@ namespace RFTestRecordManagementSystem
 
     public class Program
     {
-        private static readonly IRFTestRecordRepository _repository = new DapperRFTestRecordRepository();
+        private static readonly bool UseJson = false;
+
+        private static readonly IRFTestRecordRepository _repository = 
+            UseJson 
+            ? (IRFTestRecordRepository)new JsonRFTestRecordRepository() 
+            : new DapperRFTestRecordRepository();
 
         private static readonly IRFTestRecordService _service = new RFTestRecordService(_repository);
+
         static void Main(string[] args)
         {
             Console.WriteLine("正在測試資料庫連線");
 
             try
             {
-                DatabaseConfigurement.TestConnection();
+                if (!UseJson)
+                {
+                    DatabaseConfigurement.TestConnection();
 
-                Console.WriteLine("資料庫連線成功");
+                    Console.WriteLine("資料庫連線成功");
+                }
+                else
+                {
+                    Console.WriteLine("目前使用 Json儲存(略過資料庫連線測試)");
+                }
 
-                Console.WriteLine("按任意鍵離開...");
-
+                Console.WriteLine("按任意鍵進入主選單...");
                 Console.ReadKey();
             }
             catch (Exception ex)
@@ -100,7 +112,7 @@ namespace RFTestRecordManagementSystem
                             ExportToJson();
                             break;
                         case "8":
-                            //InportFromJson;
+                            ImportFromJson();
                             break;
                         case "9":
                             exit = true;
@@ -276,9 +288,9 @@ namespace RFTestRecordManagementSystem
                 Console.WriteLine("確認是否要更新?(Y/N)");
                 Console.ResetColor();
 
-                string comfirm = Console.ReadLine().Trim().ToUpper();
+                string confirm = Console.ReadLine().Trim().ToUpper();
 
-                if (comfirm != "Y")
+                if (confirm != "Y")
                 {
                     Console.WriteLine("取消更新操作");
                     return;
@@ -402,13 +414,14 @@ namespace RFTestRecordManagementSystem
             {
                 int count = 1;
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"[count] 測試紀錄：\n" +
-                                  $"Regulation = {record.Regulation}, " +
-                                  $"RadioTechnology = {record.RadioTechnology}, " +
-                                  $"Band = {record.Band}, " +
-                                  $"PowerDbm = {record.PowerDbm}, " +
-                                  $"Result = {record.Result}, " +
-                                  $"TestDate = {record.TestDate}");
+                Console.WriteLine($"[{count}] 找到紀錄：");
+                Console.WriteLine($"  RecordId          = {record.RecordId}");
+                Console.WriteLine($"  Regulation        = {record.Regulation}");
+                Console.WriteLine($"  RadioTechnology   = {record.RadioTechnology}");
+                Console.WriteLine($"  Band              = {record.Band}");
+                Console.WriteLine($"  PowerDbm          = {record.PowerDbm}");
+                Console.WriteLine($"  Result            = {record.Result}");
+                Console.WriteLine($"  TestDate          = {record.TestDate:yyyyMMdd}");
                 count++;
                 Console.ResetColor();
             }
@@ -418,7 +431,7 @@ namespace RFTestRecordManagementSystem
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("   ===查詢所有測試紀錄===   ");
-            Console.ReadKey();
+            Console.ResetColor();
 
             var records = _service.GetAllRecords();
 
@@ -443,7 +456,7 @@ namespace RFTestRecordManagementSystem
                     Console.WriteLine($"  Band              = {record.Band}");
                     Console.WriteLine($"  PowerDbm          = {record.PowerDbm}");
                     Console.WriteLine($"  Result            = {record.Result}");
-                    Console.WriteLine($"  TestDate          = {record.TestDate}");
+                    Console.WriteLine($"  TestDate          = {record.TestDate:yyyyMMdd}");
                     Console.WriteLine(new string('-', 50));
                     count++;
                     Console.ResetColor();
@@ -470,7 +483,7 @@ namespace RFTestRecordManagementSystem
             while (string.IsNullOrWhiteSpace(regulation) && string.IsNullOrWhiteSpace(radioTechnology))
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write("不可以 regulation、radioTechnology 同時都沒輸入，請重新輸入：");
+                Console.Write("不可以同時都沒輸入，請重新輸入：");
                 Console.ResetColor();
 
                 Console.Write("請輸入法規：");
@@ -501,7 +514,7 @@ namespace RFTestRecordManagementSystem
                     Console.WriteLine($"  Band              = {record.Band}");
                     Console.WriteLine($"  PowerDbm          = {record.PowerDbm}");
                     Console.WriteLine($"  Result            = {record.Result}");
-                    Console.WriteLine($"  TestDate          = {record.TestDate}");
+                    Console.WriteLine($"  TestDate          = {record.TestDate:yyyyMMdd}");
                     Console.WriteLine(new string('-',50));
                     count++;
                     Console.ResetColor();
@@ -539,14 +552,18 @@ namespace RFTestRecordManagementSystem
                 // 確保 Export 資料夾存在（否則會報錯）
                 Directory.CreateDirectory(Path.GetDirectoryName(defaultPath));
 
-                Console.Write($"預設儲存路徑為：{defaultPath}，是否要修改儲存位置?(Y/N)：");
+                Console.Write($"預設儲存路徑為：\n{defaultPath}，是否要修改儲存位置?(Y/N)：");
                 string answer = Console.ReadLine().Trim().ToUpper();
 
                 string filePath = defaultPath;
                 if (answer == "Y")
                 {
                     Console.Write("請輸入要儲存的完整路徑(含檔名.json)：");
-                    filePath = Console.ReadLine().Trim();
+                    string inputPath = Console.ReadLine().Trim();
+                    if (!string.IsNullOrWhiteSpace(inputPath))
+                    { 
+                        filePath = inputPath;
+                    }
                 }
 
                 JsonFileHelper.ExportToJson(records, filePath);
@@ -559,6 +576,115 @@ namespace RFTestRecordManagementSystem
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"匯出失敗，{ex.Message}");
+                Console.ResetColor();
+            }
+        }
+
+        private static void ImportFromJson()
+        {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("   ===匯入 Json 檔案===   ");
+            Console.ResetColor();
+
+            try
+            {
+                Console.Write("請輸入完整檔案路徑(含檔名.json)：");
+
+                string filePath = Console.ReadLine().Trim();
+
+                while (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+                { 
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine($"檔案路徑有誤or檔案不存在，請重新輸入：");
+                    Console.ResetColor();
+
+                    filePath = Console.ReadLine().Trim().ToUpper();
+                }
+
+                var records = JsonFileHelper.ImportFromJson(filePath);
+
+                if (records == null || !records.Any())
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("指定檔案中沒有任何可匯入的資料");
+                    Console.ResetColor();
+                    return;
+                }
+                else
+                {
+                    int count = 1;
+                    foreach (var record in records)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine($"[{count}] 找到紀錄：");
+                        Console.WriteLine($"  RecordId          = {record.RecordId}");
+                        Console.WriteLine($"  Regulation        = {record.Regulation}");
+                        Console.WriteLine($"  RadioTechnology   = {record.RadioTechnology}");
+                        Console.WriteLine($"  Band              = {record.Band}");
+                        Console.WriteLine($"  PowerDbm          = {record.PowerDbm}");
+                        Console.WriteLine($"  Result            = {record.Result}");
+                        Console.WriteLine($"  TestDate          = {record.TestDate:yyyyMMdd}");
+                        Console.WriteLine(new string('-', 50));
+                        count++;
+                        Console.ResetColor();
+                    }
+                }
+
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"總共有{records.Count}筆數據");
+                Console.ResetColor();
+
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("是否要將這些資料寫入資料庫中?(Y/N)");
+                Console.ResetColor();
+
+                string confirm = Console.ReadLine().Trim().ToUpper();
+                if (confirm == "Y")
+                {
+                    int successCount = 0;
+                    int skipCount = 0;
+                    foreach (var record in records)
+                    {
+                        record.RecordId = 0;
+
+                        if (_service.GetRecordById(record.RecordId) != null)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine($"RecordId：{record.RecordId}已存在，略過");
+                            Console.ResetColor();
+                            skipCount++;
+                            continue;
+                        }
+                        else
+                        {
+                            try
+                            {
+                                _service.AddRecord(
+                                                    record.Regulation,
+                                                    record.RadioTechnology,
+                                                    record.Band,
+                                                    record.PowerDbm,
+                                                    record.Result,
+                                                    record.TestDate);
+                                successCount++;
+                            }
+                            catch (Exception ex)
+                            { 
+                                Console.ForegroundColor = ConsoleColor.Yellow;
+                                Console.WriteLine($"發生異常錯誤，無法將資料新增到資料庫：{ex.Message}");
+                                Console.ResetColor();
+                            }
+                        }
+                    }
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"匯入成功，總共成功匯入：{successCount}筆，略過：{skipCount}筆資料，共{records.Count}筆");
+                    Console.ResetColor();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"發生異常錯誤，無法順利匯入檔案，{ex.Message}");
                 Console.ResetColor();
             }
         }

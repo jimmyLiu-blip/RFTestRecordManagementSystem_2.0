@@ -136,7 +136,7 @@ namespace RFTestRecordManagementSystem_Repository
                     {
                         File.AppendAllText(Path.Combine(logDirection, "Repo_Dapper_error_log.txt"), $"[{DateTime.Now}]查詢失敗：找不到RecordId：{recordId}{Environment.NewLine}");
 
-                        throw new InvalidOperationException($"查詢失敗，找不到RecordId={recordId}的紀錄");
+                        return null;
                     }
                     else
                     {
