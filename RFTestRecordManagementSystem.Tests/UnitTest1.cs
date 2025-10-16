@@ -44,6 +44,11 @@ namespace RFTestRecordManagementSystem.Tests
         {
             var mockRepo = new Mock<IRFTestRecordRepository>();
             var service = new RFTestRecordService(mockRepo.Object);
+            // Record.Exception() 是 xUnit提供的一個輔助方法，用來捕捉某段程式碼在執行時是否拋出了例外
+            // var exception = Record.Exception(() => 要執行的動作);
+            // Record.Exception 會執行括號內的 Lambda 表達式（() => {...}）
+            // 如果那段程式碼 拋出例外，它會 回傳該 Exception 物件
+            // 如果 沒有拋出例外，它會回傳 null
             var exception = Record.Exception(() =>
                 service.AddRecord("FCC", "NR", "B2", powerDbm, "Fail", DateTime.Today));
 
@@ -81,6 +86,7 @@ namespace RFTestRecordManagementSystem.Tests
             var mockRepo = new Mock<IRFTestRecordRepository>();
             var service = new RFTestRecordService(mockRepo.Object);
 
+            // 設定這個模擬方法可以被驗證(Verifiable())，之後可以用Verify()來確認它有沒有被呼叫過
             mockRepo.Setup( r => r.InsertRecord(It.IsAny<RFTestRecord>())).Verifiable();
 
             service.AddRecord("FCC", "NR", "B1", 20, "Pass", DateTime.Today);
@@ -103,8 +109,9 @@ namespace RFTestRecordManagementSystem.Tests
             var mockRepo = new Mock<IRFTestRecordRepository>();
             var service = new RFTestRecordService(mockRepo.Object);
 
+            // 驗證外部結果/例外
             Assert.Throws<ArgumentException>(() => service.AddRecord("", "NR", "B1", 20, "Pass", DateTime.Today));
-
+            // 驗證內部方法(是否呼叫方法、幾次、傳入什麼)
             mockRepo.Verify(r => r.InsertRecord(It.IsAny<RFTestRecord>()), Times.Never);
         }
     }
