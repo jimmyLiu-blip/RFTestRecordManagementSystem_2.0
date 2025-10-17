@@ -19,6 +19,8 @@ namespace RFTestRecordManagementSystem_Repository
                                  (Regulation, RadioTechnology, Band, PowerDbm, Result, TestDate)
                                  VALUES (@Regulation, @RadioTechnology, @Band, @PowerDbm, @Result, @TestDate)
                                  SELECT CAST(SCOPE_IDENTITY() AS INT);";
+            // SELECT SCOPE_IDENTITY()可以取回數字，但是是decimal
+            // 透過 CAST...AS INT將它轉為整數
             try
             {
                 using (var cn = DatabaseConfigurement.GetConnection())
@@ -42,8 +44,6 @@ namespace RFTestRecordManagementSystem_Repository
                 File.AppendAllText(Path.Combine(logDirection, "Repo_Dapper_error_log.txt"), $"[{DateTime.Now}]新增失敗：{ex.Message}{Environment.NewLine}");
                 throw new InvalidOperationException($"新增失敗，出現異常錯誤", ex);
             }
-
-
         }
 
         public void UpdateRecord(RFTestRecord record)
@@ -207,6 +207,7 @@ namespace RFTestRecordManagementSystem_Repository
                                 FROM dbo.RFTestRecords
                                 WHERE 1 = 1";
 
+                    // Dapper的參數容器，動態加幾個條件，就對應加幾個參數
                     var parameters = new DynamicParameters();
 
                     if (!string.IsNullOrWhiteSpace(regulation))
