@@ -28,10 +28,8 @@ namespace RFTestRecordManagementSystem
     {
         private static readonly bool UseJson = false;
 
-        private static readonly IRFTestRecordRepository _repository =
-            UseJson
-            ? (IRFTestRecordRepository)new JsonRFTestRecordRepository()
-            : new DapperRFTestRecordRepository();
+        private static readonly IRFTestRecordRepository _repository = UseJson ?
+            (IRFTestRecordRepository)new JsonRFTestRecordRepository(): new DapperRFTestRecordRepository();
 
         private static readonly IRFTestRecordService _service = new RFTestRecordService(_repository);
 

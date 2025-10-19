@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RFTestRecordManagementSyste
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RFTestRecordManagementSystem_Service", "RFTestRecordManagementSystem_Service\RFTestRecordManagementSystem_Service.csproj", "{60EF045A-614F-4A5D-8A45-851D3887191B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RFTestRecordManagementSystem_API", "RFTestRecordManagementSystem_API\RFTestRecordManagementSystem_API.csproj", "{22CE658B-1AAE-47EC-958C-E1D34D883FD7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{60EF045A-614F-4A5D-8A45-851D3887191B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60EF045A-614F-4A5D-8A45-851D3887191B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60EF045A-614F-4A5D-8A45-851D3887191B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22CE658B-1AAE-47EC-958C-E1D34D883FD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22CE658B-1AAE-47EC-958C-E1D34D883FD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22CE658B-1AAE-47EC-958C-E1D34D883FD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22CE658B-1AAE-47EC-958C-E1D34D883FD7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
