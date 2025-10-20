@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace RFTestRecordManagementSystem
 {
-    // 解耦合 UI 和 Domain
+
     public class RFTestInput
     {
         public string Regulation { get; set; }
@@ -28,8 +28,8 @@ namespace RFTestRecordManagementSystem
     {
         private static readonly bool UseJson = false;
 
-        private static readonly IRFTestRecordRepository _repository = UseJson ? 
-            (IRFTestRecordRepository)new JsonRFTestRecordRepository() : new DapperRFTestRecordRepository();
+        private static readonly IRFTestRecordRepository _repository = UseJson ?
+            (IRFTestRecordRepository)new JsonRFTestRecordRepository(): new DapperRFTestRecordRepository();
 
         private static readonly IRFTestRecordService _service = new RFTestRecordService(_repository);
 
