@@ -14,7 +14,10 @@ namespace RFTestRecordManagementSystem_API
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
+            // 先註冊 Web API 路由
             GlobalConfiguration.Configure(WebApiConfig.Register);
+            // 不要再手動呼叫 SwaggerConfig.Register()，會導致路由重複
+            // 因為 WebActivatorEx 已經會自動執行
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
