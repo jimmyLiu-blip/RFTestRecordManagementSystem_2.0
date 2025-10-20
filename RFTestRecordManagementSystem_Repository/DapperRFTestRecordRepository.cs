@@ -114,7 +114,6 @@ namespace RFTestRecordManagementSystem_Repository
                 File.AppendAllText(Path.Combine(logDirection, "Repo_Dapper_error_log.txt"), $"[{DateTime.Now}]刪除失敗：{ex.Message}{Environment.NewLine}");
                 throw new InvalidOperationException($"刪除失敗，出現異常錯誤", ex);
             }
-
         }
 
         public RFTestRecord GetRecordById(int recordId)
@@ -152,7 +151,6 @@ namespace RFTestRecordManagementSystem_Repository
 
                 throw new InvalidOperationException($"查詢失敗，出現異常錯誤", ex);
             }
-
         }
 
         public List<RFTestRecord> GetAllRecords()
@@ -162,7 +160,6 @@ namespace RFTestRecordManagementSystem_Repository
             const string sql = @"SELECT RecordId, Regulation, RadioTechnology, Band, PowerDbm, Result, TestDate
                                  FROM dbo.RFTestRecords
                                  ORDER BY RecordId";
-
             try
             {
                 using (var cn = DatabaseConfigurement.GetConnection())
