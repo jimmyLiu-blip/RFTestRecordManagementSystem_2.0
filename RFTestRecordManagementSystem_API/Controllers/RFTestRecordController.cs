@@ -13,7 +13,7 @@ namespace RFTestRecordManagementSystem_API.Controllers
 
         public RFTestRecordController(IRFTestRecordRepository repository)
         {
-            _repository = repository;       
+            _repository = repository;
         }
 
         //GET: api / RFTestRecord
