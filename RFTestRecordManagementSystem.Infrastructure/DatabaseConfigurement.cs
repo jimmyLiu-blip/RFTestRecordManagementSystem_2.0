@@ -42,7 +42,6 @@ namespace RFTestRecordManagementSystem.Infrastructure
             {
                 using (var connection = new SqlConnection(_connectionString))
                 {
-
                     connection.Open();
                     return connection.State == ConnectionState.Open;
                 }
@@ -56,8 +55,6 @@ namespace RFTestRecordManagementSystem.Infrastructure
                 throw new InvalidOperationException($"資料庫連線失敗：{ex.Message}", ex);
             }
         }
-
     }
-
 }
 

@@ -37,6 +37,7 @@ namespace RFTestRecordManagementSystem_Repository
                 };
 
                 var jsonString = JsonSerializer.Serialize(records, options);
+                // File.WriteAllText(path, contents, encoding)
                 File.WriteAllText(_jsonPath, jsonString, new UTF8Encoding(true));
             }
             catch (Exception ex)
@@ -171,6 +172,9 @@ namespace RFTestRecordManagementSystem_Repository
             {
                 var records = LoadRecord();
 
+                // 字串的搜尋方法：string.IndexOf(string value, StringComparison comparisonType)
+                // 回傳子字串 value 在目前字串中「第一次出現」的位置索引（index）； 如果找不到 → 回傳 -1。
+                // StringComparison.OrdinalIgnoreCase：1.使用「字元逐一比對（Ordinal）」的方式搜尋 2.忽略大小寫
                 var filteredRecords = records.Where(r =>
                     (string.IsNullOrWhiteSpace(regulation) || r.Regulation.IndexOf(regulation, StringComparison.OrdinalIgnoreCase) >= 0) &&
                     (string.IsNullOrWhiteSpace(radioTechnology) || r.RadioTechnology.IndexOf(radioTechnology, StringComparison.OrdinalIgnoreCase) >= 0))

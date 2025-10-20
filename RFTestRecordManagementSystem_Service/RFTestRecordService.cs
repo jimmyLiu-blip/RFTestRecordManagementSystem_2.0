@@ -29,6 +29,7 @@ namespace RFTestRecordManagementSystem_Service
 
         private void ValidateUserInput(string regulation, string radioTechnology, string band, decimal powerDbm, string result, DateTime testDate)
         {
+            // nameof(regulation)會回傳"regulation"，在錯誤訊息或除錯時，會明確指出是哪個參數出錯
             if (string.IsNullOrWhiteSpace(regulation))
             {
                 throw new ArgumentException("Regulation 不可以為空", nameof(regulation));
@@ -105,11 +106,15 @@ namespace RFTestRecordManagementSystem_Service
             }
 
             _repository.DeleteRecord(recordId);
-
         }
 
         public RFTestRecord GetRecordById(int recordId)
         {
+            if (recordId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(recordId), "紀錄編號必須 > 0");
+            }
+
             return _repository.GetRecordById(recordId);
         }
 

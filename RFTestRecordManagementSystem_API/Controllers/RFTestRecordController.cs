@@ -1,19 +1,26 @@
-﻿using System.Collections.Generic;
-using System.Web.Http;
-using RFTestRecordManagementSystem_Service;
-using RFTestRecordManagementSystem_Domain;
+﻿using RFTestRecordManagementSystem_Domain;
 using RFTestRecordManagementSystem_Repository;
+using RFTestRecordManagementSystem_Service;
+using System.Collections.Generic;
+using System.Web.Http; // 使用API時要用到
+using static System.Net.WebRequestMethods;
 
 namespace RFTestRecordManagementSystem_API.Controllers
 {
+    // ApiController 是 ASP.NET Web API 框架內建的基底類別
+    // 讓控制器具備「Web API 特性」，例如：
+    // 1.自動解析 HTTP 請求（GET, POST, PUT, DELETE）
+    // 2.自動回傳 JSON 格式資料
+    // 3.支援屬性路由[HttpGet], [HttpPost], [Route] 等
+    // 4.支援回傳 HTTP 狀態碼（Ok(), NotFound(), BadRequest()）
     public class RFTestRecordController : ApiController
     {
-        private readonly IRFTestRecordRepository _repository;
         private readonly IRFTestRecordService _service;
 
-        public RFTestRecordController(IRFTestRecordRepository repository)
+        public RFTestRecordController()
         {
-            _repository = repository;
+            var _repository = new DapperRFTestRecordRepository();
+            _service = new RFTestRecordService(_repository);      
         }
 
         //GET: api / RFTestRecord
@@ -30,9 +37,9 @@ namespace RFTestRecordManagementSystem_API.Controllers
             var record = _service.GetRecordById(id);
             if (record == null)
             {
-                return NotFound();
+                return NotFound(); // 回傳 404
             }
-            return Ok(record);
+            return Ok(record);     // 回傳 200 + Json
         }
 
         // POST: api / RFTestRecord
